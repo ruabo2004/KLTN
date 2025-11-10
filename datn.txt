@@ -1,0 +1,112 @@
+Đây là một lựa chọn Tech Stack (chồng công nghệ) rất tốt, hiện đại và có tính liên kết cao.
+
+Ưu điểm lớn nhất là bạn dùng JavaScript (hoặc TypeScript) cho cả Frontend (React Native) và Backend (Node.js). Điều này giúp đồng bộ hóa đội ngũ và logic.
+
+Tuy nhiên, với việc bạn chọn cả Node.js (Express) và Firebase, chúng ta cần làm rõ một mô hình kiến trúc hiệu quả.
+
+Phân Tích & Phân Chia Vai Trò
+Bạn đã chọn một mô hình "lai" (Hybrid) rất mạnh. Đừng nghĩ Node.js và Firebase cạnh tranh nhau, mà hãy để chúng bổ trợ cho nhau.
+
+Đây là cách phân chia vai trò rõ ràng và hiệu quả nhất:
+
+1. React Native (Frontend)
+Chịu trách nhiệm toàn bộ giao diện người dùng (UI).
+
+Ghi âm giọng nói của người dùng (sẽ cần thư viện).
+
+Giao tiếp trực tiếp với Firebase cho các tác vụ:
+
+Đăng nhập/Đăng ký (dùng Firebase Authentication).
+
+Upload file ghi âm (.wav) lên Firebase Storage.
+
+Lắng nghe (realtime) kết quả/điểm số từ Firebase Firestore.
+
+Giao tiếp với Server Node.js của bạn:
+
+Sau khi upload file lên Storage xong, nó sẽ gọi 1 API của Node.js và báo rằng: "Tôi vừa upload file audio-xyz.wav cho user user-abc, hãy chấm điểm đi."
+
+2. Firebase (Backend-as-a-Service - BaaS)
+Firebase Authentication: Xử lý toàn bộ việc đăng nhập, đăng ký, quên mật khẩu. React Native sẽ gọi trực tiếp mà không cần qua Node.js.
+
+Firebase Storage: Nơi lưu trữ tài nguyên. Đây là "kho" chứa tất cả các file âm thanh .wav mà người dùng ghi âm.
+
+Firebase Firestore (Database): Nơi lưu trữ dữ liệu có cấu trúc.
+
+Lưu thông tin người dùng (profile).
+
+Lưu nội dung bài học, các câu mẫu.
+
+Lưu kết quả chấm điểm (điểm số, lỗi sai...) mà server Node.js gửi về.
+
+3. Node.js + Express (Backend Tùy chỉnh)
+Đây là "bộ não xử lý logic" hay "người trung gian" quan trọng nhất.
+
+Nó sẽ KHÔNG nhận file âm thanh trực tiếp từ React Native (vì sẽ rất nặng và chậm).
+
+Nó sẽ được cài đặt Firebase Admin SDK (để có quyền admin) và Azure AI Speech SDK.
+
+Nó chỉ cung cấp một vài API cốt lõi, ví dụ: /request-scoring.
+
+🗺️ Luồng Hoạt Động (Data Flow) Đề Xuất
+Đây là kịch bản hoàn chỉnh từ A đến Z khi người dùng bấm nút "Nói":
+
+[React Native] Người dùng nhấn nút, ứng dụng bắt đầu ghi âm. (Sử dụng thư viện như react-native-audio-recorder-player).
+
+[React Native] Người dùng nói xong, ứng dụng dừng ghi. Tạo ra một file my-recording.wav.
+
+[React Native -> Firebase] Ứng dụng dùng SDK của Firebase (@react-native-firebase/storage) để upload file my-recording.wav lên Firebase Storage.
+
+[Firebase] Storage trả về một đường dẫn (Download URL) của file đó.
+
+[React Native -> Node.js] Ứng dụng gọi API server của bạn (ví dụ: POST /request-scoring) với nội dung:
+
+JSON
+
+{
+  "fileUrl": "https://firebasestorage.googleapis.com/...",
+  "userId": "user-abc",
+  "lessonId": "lesson-123"
+}
+[Node.js Server] Nhận được yêu cầu.
+
+[Node.js Server] Dùng fileUrl để tải file .wav từ Firebase Storage về server.
+
+[Node.js -> Azure] Dùng SDK Azure AI Speech (microsoft-cognitiveservices-speech-sdk) để gửi file âm thanh này đi chấm điểm.
+
+[Azure] Trả về một file JSON chi tiết (điểm tổng, điểm phát âm, lỗi sai ở từ nào...).
+
+[Node.js -> Firebase] Server Node.js xử lý file JSON này và lưu kết quả vào Firebase Firestore (ví dụ: trong collection scores của userId).
+
+[Firebase -> React Native] App React Native đang "lắng nghe" (realtime listener) collection scores đó. Ngay khi thấy có dữ liệu mới, nó tự động tải về và hiển thị kết quả cho người dùng.
+
+Tại sao luồng này lại tốt?
+
+Bất đồng bộ (Asynchronous): Người dùng không phải nhìn màn hình "loading" chờ chấm điểm. Ngay sau khi upload (bước 3), họ có thể làm việc khác. Khi nào có điểm (bước 11), app sẽ tự cập nhật.
+
+Tối ưu: Server Node.js của bạn chỉ xử lý logic, không phải xử lý gánh nặng băng thông của việc upload file. Firebase Storage đã làm việc đó.
+
+🔧 Các "Mảnh Ghép" Công Nghệ Cần Thiết
+Để thực hiện luồng trên, bạn sẽ cần các thư viện (library) cụ thể sau:
+
+React Native:
+
+@react-native-firebase/app (Lõi)
+
+@react-native-firebase/auth (Đăng nhập)
+
+@react-native-firebase/storage (Upload file)
+
+@react-native-firebase/firestore (Lấy dữ liệu & nghe kết quả)
+
+react-native-audio-recorder-player (hoặc một thư viện tương tự để ghi âm)
+
+Node.js (Express) Server:
+
+express (Framework)
+
+firebase-admin (Để Node.js nói chuyện với Firebase với tư cách Admin)
+
+microsoft-cognitiveservices-speech-sdk (Để nói chuyện với Azure)
+
+axios (Hoặc node-fetch để tải file từ Firebase Storage về)
