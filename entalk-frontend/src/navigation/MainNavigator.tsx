@@ -12,7 +12,7 @@ import {Text} from 'react-native';
 import HomeScreen from '../screens/home/HomeScreen';
 import LessonsStackNavigator from './LessonsStackNavigator';
 import HistoryScreen from '../screens/results/HistoryScreen';
-import ProfileScreen from '../screens/profile/ProfileScreen';
+import ProfileStackNavigator from './ProfileStackNavigator';
 import AdvancedStackNavigator from './AdvancedStackNavigator';
 
 const Tab = createBottomTabNavigator();
@@ -92,17 +92,9 @@ const MainNavigator = () => {
       />
       <Tab.Screen
         name="ProfileTab"
-        component={ProfileScreen}
+        component={ProfileStackNavigator}
         options={{
           title: 'Cá nhân',
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: COLORS.PRIMARY,
-          },
-          headerTintColor: COLORS.TEXT_LIGHT,
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
           tabBarIcon: ({color, focused}) => (
             <Text style={{fontSize: focused ? 28 : 24}}>👤</Text>
           ),
