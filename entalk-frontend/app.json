@@ -1,6 +1,37 @@
 {
   "name": "EnTalkApp",
   "displayName": "EnTalk - Học phát âm tiếng Anh",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "expo": {
+    "name": "EnTalk",
+    "slug": "entalk-frontend",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.entalkapp"
+    },
+    "android": {
+      "package": "com.entalkapp",
+      "googleServicesFile": "./android/app/google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth"
+    ]
+  }
 }
-

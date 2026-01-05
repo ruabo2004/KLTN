@@ -17,7 +17,7 @@ export const firebaseConfig = {
 // Cho thiết bị Android thật: Dùng IP của laptop
 // Cho emulator: Dùng 10.0.2.2
 export const API_BASE_URL = __DEV__
-  ? 'http://192.168.1.62:3000/api'  // IP laptop của bạn
+  ? 'http://192.168.100.118:3000/api'  // IP laptop của bạn
   : 'https://your-production-url.com/api';
 
 export default firebaseConfig;
